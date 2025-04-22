@@ -1,11 +1,30 @@
 const User = require("../model/user");
- 
+ const bcrypt = require("bcryptjs"); // Importando o bcrypt para criptografar a senha
+
+
 const userController = {
     create: async (request, response) => {
         try {
             const { nome, email, senha } = request.body;
+
+            // Para tela de login
+            if (!email || !senha) {
+                return response.status(400).json({
+                    msg: "Campos Invalidos"
+                });
+            }
+
+            if (!nome || !email || !senha) {
+                return response.status(400).json({
+                    msg: "Campos incompleto"
+                });
+            }
+
+            // Senha criptografada 
+            const hasehedSenha = await bcrypt.hash(senha, 10);
  
-            const userCriado = await User.create({ nome, email, senha });
+            // Salvar a senha criptografada no banco de dados
+            const userCriado = await User.create({ nome, email, senha: hasehedSenha });
  
             return response.status(201).json({
                 msg:" o usuario foi crido com sucesso",
@@ -50,6 +69,7 @@ const userController = {
             })
         }
      },
+    // Listar todos os usuarios
     findAll: async (request, response) => {
         try {
             const user = await User.findAll()
